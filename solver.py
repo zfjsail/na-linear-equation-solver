@@ -5,7 +5,7 @@ from scipy.linalg import hilbert
 class Solver:
     def __init__(self, A, b):
         self.A = A  # square
-        print(self.A)
+        # print(self.A)
         self.b = b
         self.n = A.shape[0]
         self.x = np.empty(self.n)
@@ -14,8 +14,8 @@ class Solver:
         a_extended = np.concatenate((self.A, self.b), axis=1)
 
         for i in range(self.n-1):
-            col_max_idx = np.argmax(abs(a_extended[i:, i]))
-            if i != col_max_idx and a_extended[i, i] < a_extended[col_max_idx, i]:  # swap
+            col_max_idx = np.argmax(abs(a_extended[i:, i])) + i  # take care for index
+            if i != col_max_idx and abs(a_extended[i, i]) < abs(a_extended[col_max_idx, i]):  # swap
                 a_extended[[i, col_max_idx]] = a_extended[[col_max_idx, i]]
             for j in range(i+1, self.n):
                 if a_extended[j, i] != 0:
@@ -63,10 +63,10 @@ class Solver:
 
 
 if __name__ == '__main__':
-    d = 2
+    d = 12
     a = hilbert(d)
     x = np.ones((d, 1))
     solver = Solver(a, np.dot(a, x))
-    # solver.gaussian_elimination()
+    solver.gaussian_elimination()
     # solver.jacobi_iter()
-    solver.gauss_seidel()
+    # solver.gauss_seidel()
