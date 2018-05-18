@@ -73,13 +73,39 @@ class Solver:
         print('--------SOR w={}-------'.format(w))
         print(x)
 
+    def conj_grad(self, N=1000, x=None, tol=1e-5):
+        if x is None:
+            x = np.zeros(self.n)
+        a_diag = np.diag(self.A)
+        M = np.diagflat(a_diag)
+        r = self.b.reshape(self.n) - np.dot(self.A, x)
+        r_old = np.empty_like(r)
+        r_old[:] = r
+        M_inv = np.diagflat(1/a_diag)
+        z = np.dot(M_inv, r)
+        z_old = np.empty_like(z)
+        z_old[:] = z
+        p = z
+        for k in range(self.n):
+            a_dot_p = np.dot(self.A, p)
+            alpha = np.dot(z, r) / np.dot(p, a_dot_p)
+            x = x + alpha * p
+            r = r_old - alpha * a_dot_p
+            z = np.dot(M_inv, r)
+            belta = np.dot(z, r) / np.dot(z_old, r_old)
+            p = z + belta * p
+            r_old, z_old = r, z
+        print('----------conj grad------------')
+        print(x)
+
 
 if __name__ == '__main__':
-    d = 12
+    d = 20
     a = hilbert(d)
     x = np.ones((d, 1))
     solver = Solver(a, np.dot(a, x))
     # solver.gaussian_elimination()
     # solver.jacobi_iter()
     # solver.gauss_seidel()
-    solver.sor()
+    # solver.sor()
+    solver.conj_grad()
