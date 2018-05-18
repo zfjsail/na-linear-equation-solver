@@ -28,7 +28,7 @@ class Solver:
         print('--------gaussian elimination--------')
         print(self.x)
 
-    def jacobi_iter(self, N=25, x=None):
+    def jacobi_iter(self, N=1000, x=None):
         if x is None:
             x = np.zeros((self.n, 1))
 
@@ -42,31 +42,27 @@ class Solver:
         print('------jacobi--------')
         print(x)
 
-    def gauss_seidel(self, N=25, x=None):
+    def gauss_seidel(self, N=1000, x=None):
         if x is None:
-            x = np.zeros((self.n, 1))
+            x = np.zeros(self.n)
 
         # U = np.triu(self.A, 1)
         # D_minus_L = np.tril(self.A)
 
-        for i in range(N):
-            for j in range(self.n):
-                r = self.b[j]
-                for k in range(j):
-                    r -= self.A[j, k] * x[k]
-                for k in range(j+1, self.n):
-                    r -= self.A[j, k] * x[k]
-                x[j] = r / self.A[j, j]
-            print('remain', np.dot(self.A, x) - self.b)
+        for _ in range(N):
+            for i in range(self.n):
+                s = sum(-self.A[i, j] * x[j] for j in range(self.n) if i != j)
+                x[i] = (s + self.b[i, 0]) / self.A[i, i]
+        # access element not sub-matrix (for example: b is two dim)
         print('--------gauss seidel-------')
         print(x)
 
 
 if __name__ == '__main__':
-    d = 12
+    d = 4
     a = hilbert(d)
     x = np.ones((d, 1))
     solver = Solver(a, np.dot(a, x))
-    solver.gaussian_elimination()
+    # solver.gaussian_elimination()
     # solver.jacobi_iter()
-    # solver.gauss_seidel()
+    solver.gauss_seidel()
