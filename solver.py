@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.linalg import hilbert
+from numpy.linalg import norm
 
 
 class Solver:
@@ -7,6 +8,7 @@ class Solver:
         self.A = A  # square
         # print(self.A)
         self.b = b
+        assert np.any(self.b)
         self.n = A.shape[0]
         self.x = np.empty(self.n)
 
@@ -73,7 +75,7 @@ class Solver:
         print('--------SOR w={}-------'.format(w))
         print(x)
 
-    def conj_grad(self, N=1000, x=None, tol=1e-5):
+    def conj_grad(self, N=1000, x=None, tol=1e-10):
         if x is None:
             x = np.zeros(self.n)
         a_diag = np.diag(self.A)
@@ -86,11 +88,15 @@ class Solver:
         z_old = np.empty_like(z)
         z_old[:] = z
         p = z
-        for k in range(self.n):
+        for k in range(N):
             a_dot_p = np.dot(self.A, p)
             alpha = np.dot(z, r) / np.dot(p, a_dot_p)
             x = x + alpha * p
             r = r_old - alpha * a_dot_p
+            err = norm(r) / norm(self.b)
+            if err <= tol:
+                print('final', x)
+                break
             z = np.dot(M_inv, r)
             belta = np.dot(z, r) / np.dot(z_old, r_old)
             p = z + belta * p
@@ -100,7 +106,7 @@ class Solver:
 
 
 if __name__ == '__main__':
-    d = 20
+    d = 100
     a = hilbert(d)
     x = np.ones((d, 1))
     solver = Solver(a, np.dot(a, x))
