@@ -57,12 +57,29 @@ class Solver:
         print('--------gauss seidel-------')
         print(x)
 
+    def sor(self, N=1000, w=1.8, x=None):
+        if x is None:
+            x = np.zeros(self.n)
+        x_old = np.empty_like(x)
+        x_old[:] = x
+
+        for _ in range(N):
+            for i in range(self.n):
+                s = sum(-self.A[i, j] * x[j] for j in range(self.n) if i != j)
+                x[i] = (s + self.b[i, 0]) / self.A[i, i]
+            x = w * x + (1 - w) * x_old
+            x_old = x
+
+        print('--------SOR w={}-------'.format(w))
+        print(x)
+
 
 if __name__ == '__main__':
-    d = 4
+    d = 12
     a = hilbert(d)
     x = np.ones((d, 1))
     solver = Solver(a, np.dot(a, x))
     # solver.gaussian_elimination()
     # solver.jacobi_iter()
-    solver.gauss_seidel()
+    # solver.gauss_seidel()
+    solver.sor()
