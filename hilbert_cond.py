@@ -13,6 +13,8 @@ def get_hilbert_cond2(n):
         x.append(i)
         y.append(math.log(cur_cond))
     plt.scatter(x, y)
+    plt.xlabel('order')
+    plt.ylabel('log(cond2)')
     plt.show()
 
 

@@ -44,7 +44,7 @@ class Solver:
         print('------jacobi--------')
         print(x)
 
-    def gauss_seidel(self, N=1000, x=None):
+    def gauss_seidel(self, N=10000, x=None):
         if x is None:
             x = np.zeros(self.n)
 
@@ -59,20 +59,28 @@ class Solver:
         print('--------gauss seidel-------')
         print(x)
 
-    def sor(self, N=1000, w=1.8, x=None):
+    def sor(self, N=100000, w=1.8, x=None, tol=1e-6):
         if x is None:
             x = np.zeros(self.n)
         x_old = np.empty_like(x)
         x_old[:] = x
 
-        for _ in range(N):
+        n_iter = None
+        b = self.b.reshape(self.n)
+
+        for it in range(N):
             for i in range(self.n):
                 s = sum(-self.A[i, j] * x[j] for j in range(self.n) if i != j)
-                x[i] = (s + self.b[i, 0]) / self.A[i, i]
+                x[i] = (s + b[i]) / self.A[i, i]
             x = w * x + (1 - w) * x_old
-            x_old = x
+            x_old[:] = x  # take care
+            err = norm(b - np.dot(self.A, x)) / norm(b)
+            if err < tol:
+                n_iter = it
+                break
 
         print('--------SOR w={}-------'.format(w))
+        print('n_iter', n_iter)
         print(x)
 
     def conj_grad(self, N=1000, x=None, tol=1e-10):
@@ -106,12 +114,15 @@ class Solver:
 
 
 if __name__ == '__main__':
-    d = 100
-    a = hilbert(d)
-    x = np.ones((d, 1))
-    solver = Solver(a, np.dot(a, x))
-    # solver.gaussian_elimination()
-    # solver.jacobi_iter()
-    # solver.gauss_seidel()
-    # solver.sor()
-    solver.conj_grad()
+    # d = 100
+    for d in range(2, 20):
+        a = hilbert(d)
+        x = np.ones((d, 1))
+        solver = Solver(a, np.dot(a, x))
+        # solver.gaussian_elimination()
+        # solver.jacobi_iter()
+        # solver.gauss_seidel()
+        # for w in range(2,20,2):
+        #     omega = 0.1*w
+        #     solver.sor(w=omega)
+        solver.conj_grad()
